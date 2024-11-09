@@ -29,13 +29,6 @@ def hex_to_rgb(hex):
     else:
         return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4, 6))
 
-'''
-# transform STR to HEX STR
-
-def str_to_hex(symbol):
-    a += format(ord(symbol), "x")
-'''
-
 """
 This part sets the type of encoding
 
@@ -66,11 +59,6 @@ for i in originalStr:
     k += 1
 
 
-# a = []
-# with open(filePath, "rb") as f:
-#     while (byte := f.read(1)):
-#         a.append(byte.decode())
-
 while len(a) % typeEncoding != 0:
     a += "0"
 
@@ -80,29 +68,6 @@ b = [a[i:i+chunkSize] for i in range(0, chunks, typeEncoding)]
 
 # divide HEX STR to HEX array
 
-#sizeDif = int(np.sqrt(len(originalStr)/ (typeEncoding / 2)))
-
-# Ye olde 
-
-"""
-pixels = []
-d = []
-j = 0
-k = 0
-for i in range(len(b)):
-    if k % 10000 == 0:
-        print(k)
-    if j < sizeDif:
-        d.append(b[i])
-        j += 1
-        k += 1
-    else:
-        pixels.append(d)
-        d = []
-        d.append(b[i])
-        j = 1
-        k += 1
-"""
 
 if b:
     while len(b) % width != 0:
@@ -125,20 +90,13 @@ for i in pixels[0]:
     newPixels.append(temp)
     temp = []
 
-'''
-for i in newPixels:
-    print(len(i))
-print(newPixels)
-'''
-
 
 print(len(newPixels), len(newPixels[0]), height)
 
 d = (0, 0, 0, 120)
 temp = [d] * width
 
-'''while len(newPixels) != height:
-    newPixels.append(temp)'''
+
 
 while len(newPixels) != height and len(newPixels) < height - len(newPixels):
     print(1)
