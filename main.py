@@ -4,17 +4,51 @@ Remake the conversion to Hex. Goal to make a tuple with 3 int in range of [0..25
 
 import numpy as np
 from PIL import Image, ImageColor
+import codecs
 
-file_path = "testTest.txt"
-with open(file_path, 'r') as file:
-    originalStr = file.read()
-# originalStr = "Hello world!"
+filePath = "readingTest.txt"
+
+# The first open is for txt files without Cyrillic
+
+# with open(file_path, 'r', ) as file:
+#    originalStr = file.read()
+
+
+file = codecs.open(filePath, "r", "utf_8_sig")
+originalStr = file.read()
+
 
 
 # transform HEX to RGB tuple 
 
 def hex_to_rgb(hex):
-  return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4))
+    if typeEncoding == 2:
+        a = int(hex[0:2], 16)
+        b = (0, 0, 0, a)
+        return b
+    else:
+        return tuple(int(hex[i:i+2], 16) for i in (0, 2, 4, 6))
+
+'''
+# transform STR to HEX STR
+
+def str_to_hex(symbol):
+    a += format(ord(symbol), "x")
+'''
+
+"""
+This part sets the type of encoding
+
+select 6 for RGB
+select 8 for RGB + alpha
+select 2 for alpha
+"""
+
+typeEncoding = 2
+
+
+beeMage = Image.open("beemage.png")
+width, height = beeMage.size
 
 
 # transform STR to HEX
@@ -22,41 +56,41 @@ def hex_to_rgb(hex):
 a = ""
 b = []
 k = 0
+lenOrStr = len(originalStr)
+
+
 for i in originalStr:
-    if k % 1000 == 0:
-        print(k)
-    if len(a) != 6:
-        if len(format(ord(i), "x")) == 1:
-            a += "0" + format(ord(i), "x")
-        else:
-            a += format(ord(i), "x")
-        k += 1
-    else:
-        b.append(a)
-        a = ''
-        if len(format(ord(i), "x")) == 1:
-            a += "0" + format(ord(i), "x")
-        else:
-            a += format(ord(i), "x")
-        k += 1
+    if k % 50000 == 0:
+        print((k / lenOrStr)* 100)
+    a += format(ord(i), "x")
+    k += 1
 
-print(a, b)
-if a:
-    while len(a) != 6:
-        a += "0"
-    b.append(a)
-    
 
+# a = []
+# with open(filePath, "rb") as f:
+#     while (byte := f.read(1)):
+#         a.append(byte.decode())
+
+while len(a) % typeEncoding != 0:
+    a += "0"
+
+# Divide into equal parts
+chunks, chunkSize = len(a), typeEncoding
+b = [a[i:i+chunkSize] for i in range(0, chunks, typeEncoding)]
 
 # divide HEX STR to HEX array
 
-sizeDif = int(np.sqrt(len(originalStr)/3))
+#sizeDif = int(np.sqrt(len(originalStr)/ (typeEncoding / 2)))
+
+# Ye olde 
+
+"""
 pixels = []
 d = []
 j = 0
 k = 0
 for i in range(len(b)):
-    if k % 1000 == 0:
+    if k % 10000 == 0:
         print(k)
     if j < sizeDif:
         d.append(b[i])
@@ -68,33 +102,66 @@ for i in range(len(b)):
         d.append(b[i])
         j = 1
         k += 1
+"""
 
-if d:
-    while len(d) != sizeDif:
-        d.append("ffffff")
-    pixels.append(d)
+if b:
+    while len(b) % width != 0:
+        emptyPixels = typeEncoding * "7"
+        b.append(emptyPixels)
+
+pixels = []
+
+chunks, chunkSize = len(b), width
+pixels.append([b[i:i+chunkSize] for i in range(0, chunks, width)])
 
 # transform HEX to RGB tuple
 
 newPixels = []
 temp = []
-for i in pixels:
+for i in pixels[0]:
     for j in i:
         e = hex_to_rgb(j)
         temp.append(e)
     newPixels.append(temp)
     temp = []
 
+'''
 for i in newPixels:
     print(len(i))
 print(newPixels)
+'''
+
+
+print(len(newPixels), len(newPixels[0]), height)
+
+d = (0, 0, 0, 120)
+temp = [d] * width
+
+'''while len(newPixels) != height:
+    newPixels.append(temp)'''
+
+while len(newPixels) != height and len(newPixels) < height - len(newPixels):
+    print(1)
+    a = len(newPixels)
+    for i in range(a):
+        newPixels.append(newPixels[i])
+    print(len(newPixels), len(newPixels[0]), height)
+else:
+    while len(newPixels) != height:
+        newPixels.append(temp)
+
+print(len(newPixels), len(newPixels[0]), height)
+
 array = np.array(newPixels, dtype=np.uint8)
 
 # Use PIL to create an image from the new array of pixels
 
+
+
 new_image = Image.fromarray(array)
-new_image.save('dostNew.png')
+new_image.save('roundTest'+ str(typeEncoding) +'.png')
 
-# new_image = Image.fromarray(newPixels)
-# new_image.save('beeNew.png')
+print(new_image.size, beeMage.size )
 
+newBeeMage = Image.alpha_composite(beeMage, new_image)
+newBeeMage.save(('roundBeeTest1'+ str(typeEncoding) +'.png'))
